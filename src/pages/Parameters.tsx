@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -102,24 +101,82 @@ const Parameters = () => {
   };
 
   const handleAddParameter = () => {
-    if (!novoParametro.nome || !novoParametro.unidade || !novoParametro.setor) {
+    // Validação dos campos obrigatórios
+    if (!novoParametro.nome.trim()) {
       toast({
         title: "Erro",
-        description: "Preencha todos os campos obrigatórios.",
+        description: "O nome do parâmetro é obrigatório.",
         variant: "destructive",
       });
       return;
     }
 
-    const newId = Math.max(...parametros.map(p => p.id)) + 1;
-    setParametros([...parametros, {
-      ...novoParametro,
-      id: newId,
-      minimo: parseFloat(novoParametro.minimo),
-      maximo: parseFloat(novoParametro.maximo),
-      emails: []
-    }]);
+    if (!novoParametro.unidade.trim()) {
+      toast({
+        title: "Erro",
+        description: "A unidade de medida é obrigatória.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    if (!novoParametro.setor) {
+      toast({
+        title: "Erro",
+        description: "Selecione um setor.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!novoParametro.minimo || !novoParametro.maximo) {
+      toast({
+        title: "Erro",
+        description: "Defina os valores mínimo e máximo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const minimoNum = parseFloat(novoParametro.minimo);
+    const maximoNum = parseFloat(novoParametro.maximo);
+
+    if (isNaN(minimoNum) || isNaN(maximoNum)) {
+      toast({
+        title: "Erro",
+        description: "Os valores mínimo e máximo devem ser números válidos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (minimoNum >= maximoNum) {
+      toast({
+        title: "Erro",
+        description: "O valor mínimo deve ser menor que o valor máximo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Criar novo parâmetro
+    const newId = parametros.length > 0 ? Math.max(...parametros.map(p => p.id)) + 1 : 1;
+    const novoParametroCompleto = {
+      id: newId,
+      nome: novoParametro.nome.trim(),
+      unidade: novoParametro.unidade.trim(),
+      minimo: minimoNum,
+      maximo: maximoNum,
+      setor: novoParametro.setor,
+      ativo: novoParametro.ativo,
+      alertas: novoParametro.alertas,
+      emails: []
+    };
+
+    // Adicionar à lista
+    setParametros([...parametros, novoParametroCompleto]);
+
+    // Limpar formulário
     setNovoParametro({
       nome: "",
       unidade: "",
@@ -133,7 +190,7 @@ const Parameters = () => {
 
     toast({
       title: "Sucesso!",
-      description: "Parâmetro adicionado com sucesso.",
+      description: `Parâmetro "${novoParametroCompleto.nome}" adicionado com sucesso.`,
     });
   };
 
@@ -243,6 +300,7 @@ const Parameters = () => {
                       <Input
                         id="minimo"
                         type="number"
+                        step="0.01"
                         placeholder="0"
                         value={novoParametro.minimo}
                         onChange={(e) => setNovoParametro({...novoParametro, minimo: e.target.value})}
@@ -253,6 +311,7 @@ const Parameters = () => {
                       <Input
                         id="maximo"
                         type="number"
+                        step="0.01"
                         placeholder="100"
                         value={novoParametro.maximo}
                         onChange={(e) => setNovoParametro({...novoParametro, maximo: e.target.value})}
