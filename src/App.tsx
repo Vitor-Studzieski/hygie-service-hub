@@ -9,6 +9,7 @@ import CreateOS from "./pages/CreateOS";
 import Orders from "./pages/Orders";
 import Parameters from "./pages/Parameters";
 import Reports from "./pages/Reports";
+import QualityControl from "./pages/QualityControl";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/orders" element={<Orders />} />
           <Route path="/parameters" element={<Parameters />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/quality-control" element={<QualityControl />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

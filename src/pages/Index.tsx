@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, CheckCircle2, Clock, FileText, Settings, Users, Calendar, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, FileText, Settings, Users, Calendar, TrendingUp, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -186,6 +186,12 @@ const Index = () => {
                   <Button variant="outline" className="w-full justify-start">
                     <Calendar className="w-4 h-4 mr-2" />
                     Gerar Relatório Mensal
+                  </Button>
+                </Link>
+                <Link to="/quality-control">
+                  <Button variant="outline" className="w-full justify-start">
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    Controle de Qualidade
                   </Button>
                 </Link>
               </div>
