@@ -146,10 +146,7 @@ const QualityControl = () => {
       // Primeiro salva o controle de qualidade
       const { data: controleData, error: controleError } = await supabase
         .from('controle_qualidade')
-        .insert([{
-          ...controleForm,
-          user_id: 'temp-user-id' // Temporário até implementar auth
-        }])
+        .insert([controleForm])
         .select()
         .single();
 
@@ -192,7 +189,7 @@ const QualityControl = () => {
       console.error('Erro ao salvar:', error);
       toast({
         title: "Erro",
-        description: "Erro ao salvar controle de qualidade. Você precisa estar autenticado.",
+        description: "Erro ao salvar controle de qualidade.",
         variant: "destructive"
       });
     }
