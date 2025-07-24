@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      cabecalho_temperatura_umidade: {
+        Row: {
+          aprovado_por: string | null
+          cnpj: string | null
+          codigo_documento: string | null
+          elaborado_em: string | null
+          elaborado_por: string | null
+          frequencia: string | null
+          id: string
+          nome_empresa: string
+          nome_planilha: string
+          revisado_em: string | null
+          revisao: string | null
+        }
+        Insert: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+        }
+        Update: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+        }
+        Relationships: []
+      }
       controle_qualidade: {
         Row: {
           assinatura: string | null
@@ -105,6 +147,78 @@ export type Database = {
             columns: ["controle_id"]
             isOneToOne: false
             referencedRelation: "controle_qualidade"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nao_conformidades: {
+        Row: {
+          acoes_corretivas: string | null
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          medidas_preventivas: string | null
+          responsavel: string | null
+        }
+        Insert: {
+          acoes_corretivas?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          medidas_preventivas?: string | null
+          responsavel?: string | null
+        }
+        Update: {
+          acoes_corretivas?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          medidas_preventivas?: string | null
+          responsavel?: string | null
+        }
+        Relationships: []
+      }
+      registros_temperatura_umidade: {
+        Row: {
+          criado_em: string | null
+          data_hora: string
+          id: string
+          id_cabecalho: string | null
+          id_nao_conformidade: string | null
+          temperatura: number | null
+          umidade: number | null
+        }
+        Insert: {
+          criado_em?: string | null
+          data_hora: string
+          id?: string
+          id_cabecalho?: string | null
+          id_nao_conformidade?: string | null
+          temperatura?: number | null
+          umidade?: number | null
+        }
+        Update: {
+          criado_em?: string | null
+          data_hora?: string
+          id?: string
+          id_cabecalho?: string | null
+          id_nao_conformidade?: string | null
+          temperatura?: number | null
+          umidade?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registros_temperatura_umidade_id_cabecalho_fkey"
+            columns: ["id_cabecalho"]
+            isOneToOne: false
+            referencedRelation: "cabecalho_temperatura_umidade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registros_temperatura_umidade_id_nao_conformidade_fkey"
+            columns: ["id_nao_conformidade"]
+            isOneToOne: false
+            referencedRelation: "nao_conformidades"
             referencedColumns: ["id"]
           },
         ]
