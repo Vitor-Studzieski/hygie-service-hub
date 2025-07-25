@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,6 @@ import {
   FileText as FilePlus
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
 
 const Index = () => {
   // Mock data - baseado na imagem
@@ -94,158 +91,155 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      
-      <div className="flex-1">
-        <Header />
-        
-        <main className="p-6">
-          {/* Cards de Estatísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-            <Card className="bg-white">
-              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">Total de OS</CardTitle>
-                <FileText className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.osTotal}</div>
-                <p className="text-xs text-emerald-600 mt-1">+12% vs. mês anterior</p>
-              </CardContent>
-            </Card>
+    <div className="p-6 bg-slate-50 min-h-screen">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <p className="text-sm text-slate-600">Visão geral das operações e indicadores</p>
+      </div>
 
-            <Card className="bg-white">
-              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">Concluídas Hoje</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.osConcluidas}</div>
-                <p className="text-xs text-emerald-600 mt-1">+8% vs. mês anterior</p>
-              </CardContent>
-            </Card>
+      {/* Cards de Estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+        <Card className="bg-white">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-slate-600">Total de OS</CardTitle>
+            <FileText className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{stats.osTotal}</div>
+            <p className="text-xs text-emerald-600 mt-1">+12% vs. mês anterior</p>
+          </CardContent>
+        </Card>
 
-            <Card className="bg-white">
-              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">Pendentes</CardTitle>
-                <Clock className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.osPendentes}</div>
-              </CardContent>
-            </Card>
+        <Card className="bg-white">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-slate-600">Concluídas Hoje</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{stats.osConcluidas}</div>
+            <p className="text-xs text-emerald-600 mt-1">+8% vs. mês anterior</p>
+          </CardContent>
+        </Card>
 
-            <Card className="bg-white">
-              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">Em Atraso</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.osAtrasadas}</div>
-                <p className="text-xs text-red-600 mt-1">+25% vs. mês anterior</p>
-              </CardContent>
-            </Card>
+        <Card className="bg-white">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-slate-600">Pendentes</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{stats.osPendentes}</div>
+          </CardContent>
+        </Card>
 
-            <Card className="bg-white">
-              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">Alertas Críticos</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.alertasCriticos}</div>
-              </CardContent>
-            </Card>
+        <Card className="bg-white">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-slate-600">Em Atraso</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{stats.osAtrasadas}</div>
+            <p className="text-xs text-red-600 mt-1">+25% vs. mês anterior</p>
+          </CardContent>
+        </Card>
 
-            <Card className="bg-white">
-              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">Taxa de Conformidade</CardTitle>
-                <TrendingUp className="h-4 w-4 text-emerald-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.conformidade}%</div>
-                <p className="text-xs text-emerald-600 mt-1">+2.1% vs. mês anterior</p>
-              </CardContent>
-            </Card>
-          </div>
+        <Card className="bg-white">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-slate-600">Alertas Críticos</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{stats.alertasCriticos}</div>
+          </CardContent>
+        </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            {/* Atividade Recente */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-slate-900">Atividade Recente</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {atividadeRecente.map((item) => (
-                    <div key={item.id} className="flex items-start gap-3">
-                      {getStatusIcon(item.status)}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900">{item.titulo}</p>
-                        <p className="text-xs text-slate-600">{item.responsavel}</p>
-                        <p className="text-xs text-slate-500">{item.data}</p>
-                      </div>
-                    </div>
-                  ))}
+        <Card className="bg-white">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-slate-600">Taxa de Conformidade</CardTitle>
+            <TrendingUp className="h-4 w-4 text-emerald-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{stats.conformidade}%</div>
+            <p className="text-xs text-emerald-600 mt-1">+2.1% vs. mês anterior</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Atividade Recente */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-slate-900">Atividade Recente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {atividadeRecente.map((item) => (
+                <div key={item.id} className="flex items-start gap-3">
+                  {getStatusIcon(item.status)}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900">{item.titulo}</p>
+                    <p className="text-xs text-slate-600">{item.responsavel}</p>
+                    <p className="text-xs text-slate-500">{item.data}</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Alertas Recentes */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-slate-900">Alertas Recentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {alertasRecentes.map((alerta) => (
-                    <div key={alerta.id} className="flex items-start gap-3">
-                      {getAlertIcon(alerta.tipo)}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900">{alerta.titulo}</p>
-                        <p className="text-xs text-slate-600">{alerta.descricao}</p>
-                        <p className="text-xs text-slate-500">{alerta.data}</p>
-                      </div>
-                    </div>
-                  ))}
+        {/* Alertas Recentes */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-slate-900">Alertas Recentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {alertasRecentes.map((alerta) => (
+                <div key={alerta.id} className="flex items-start gap-3">
+                  {getAlertIcon(alerta.tipo)}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900">{alerta.titulo}</p>
+                    <p className="text-xs text-slate-600">{alerta.descricao}</p>
+                    <p className="text-xs text-slate-500">{alerta.data}</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Ações Rápidas */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-slate-900">Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4">
-                  <Link to="/create-os">
-                    <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
-                      <FilePlus className="w-8 h-8 mx-auto mb-2 text-emerald-600" />
-                      <p className="text-sm font-medium text-slate-900">Nova OS</p>
-                      <p className="text-xs text-slate-600">Criar ordem de serviço</p>
-                    </Card>
-                  </Link>
-                  
-                  <Link to="/parameters">
-                    <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
-                      <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-orange-500" />
-                      <p className="text-sm font-medium text-slate-900">Registrar Parâmetro</p>
-                      <p className="text-xs text-slate-600">Inserir valores monitorados</p>
-                    </Card>
-                  </Link>
-                  
-                  <Link to="/reports">
-                    <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
-                      <BarChart3 className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                      <p className="text-sm font-medium text-slate-900">Gerar Relatório</p>
-                      <p className="text-xs text-slate-600">Relatório consolidado</p>
-                    </Card>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+        {/* Ações Rápidas */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-slate-900">Ações Rápidas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4">
+              <Link to="/create-os">
+                <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
+                  <FilePlus className="w-8 h-8 mx-auto mb-2 text-emerald-600" />
+                  <p className="text-sm font-medium text-slate-900">Nova OS</p>
+                  <p className="text-xs text-slate-600">Criar ordem de serviço</p>
+                </Card>
+              </Link>
+              
+              <Link to="/parameters">
+                <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
+                  <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                  <p className="text-sm font-medium text-slate-900">Registrar Parâmetro</p>
+                  <p className="text-xs text-slate-600">Inserir valores monitorados</p>
+                </Card>
+              </Link>
+              
+              <Link to="/reports">
+                <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
+                  <BarChart3 className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <p className="text-sm font-medium text-slate-900">Gerar Relatório</p>
+                  <p className="text-xs text-slate-600">Relatório consolidado</p>
+                </Card>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
