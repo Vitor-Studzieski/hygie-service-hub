@@ -1,240 +1,251 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, CheckCircle2, Clock, FileText, Settings, Users, Calendar, TrendingUp, ShieldCheck } from "lucide-react";
+import { 
+  AlertTriangle, 
+  CheckCircle2, 
+  Clock, 
+  FileText, 
+  TrendingUp,
+  BarChart3,
+  Settings,
+  FileText as FilePlus
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 
 const Index = () => {
-  // Mock data - em produção viria do backend
+  // Mock data - baseado na imagem
   const stats = {
-    osTotal: 45,
-    osPendentes: 12,
-    osConcluidas: 28,
-    osAtrasadas: 5,
-    alertasAtivos: 3,
-    conformidade: 89
+    osTotal: 156,
+    osConcluidas: 12,
+    osPendentes: 8,
+    osAtrasadas: 3,
+    alertasCriticos: 1,
+    conformidade: 94.2
   };
 
-  const osRecentes = [
-    { id: 1, titulo: "Controle de Umidade - Setor A", status: "pendente", prazo: "2025-07-03", responsavel: "João Silva" },
-    { id: 2, titulo: "Verificação Temperatura Câmara Fria", status: "concluida", prazo: "2025-07-02", responsavel: "Maria Santos" },
-    { id: 3, titulo: "Limpeza e Desinfecção", status: "atrasada", prazo: "2025-07-01", responsavel: "Pedro Lima" },
-    { id: 4, titulo: "Calibração Equipamentos", status: "pendente", prazo: "2025-07-04", responsavel: "Ana Costa" }
-  ];
-
-  const alertas = [
-    { id: 1, tipo: "Temperatura", valor: "28.5°C", limite: "25°C", setor: "Produção A" },
-    { id: 2, tipo: "Umidade", valor: "85%", limite: "80%", setor: "Estoque" },
-    { id: 3, tipo: "pH", valor: "4.2", limite: "5.0 - 7.0", setor: "Laboratório" }
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'concluida': return 'bg-green-100 text-green-800 border-green-200';
-      case 'pendente': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'atrasada': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const atividadeRecente = [
+    { 
+      id: 1, 
+      titulo: "Controle de Umidade - Sala Limpa A", 
+      responsavel: "Atribuída para João Silva",
+      data: "14/07/2025 - Pendente",
+      status: "pendente" 
+    },
+    { 
+      id: 2, 
+      titulo: "Verificação de Temperatura - Sistema HVAC", 
+      responsavel: "Atribuída para João Silva",
+      data: "14/07/2025 - Concluída",
+      status: "concluida" 
+    },
+    { 
+      id: 3, 
+      titulo: "Inspeção Semanal de Equipamentos", 
+      responsavel: "Atribuída para João Silva",
+      data: "14/07/2025 - Atrasada",
+      status: "atrasada" 
     }
-  };
+  ];
+
+  const alertasRecentes = [
+    {
+      id: 1,
+      titulo: "Pressão Diferencial Crítica",
+      descricao: "Pressão diferencial abaixo do limite mínimo (8.2 Pa < 10 Pa)",
+      data: "23/07/2025 às 14:31:20",
+      tipo: "critico"
+    },
+    {
+      id: 2,
+      titulo: "Tarefa em Atraso",
+      descricao: "Inspeção Semanal de Equipamentos está 12 horas em atraso",
+      data: "24/07/2025 às 08:41:38",
+      tipo: "atraso"
+    },
+    {
+      id: 3,
+      titulo: "Umidade Acima do Limite",
+      descricao: "Umidade relativa acima do limite máximo (63.2% > 60%)",
+      data: "25/07/2025 às 03:51:08",
+      tipo: "alerta"
+    }
+  ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'concluida': return <CheckCircle2 className="w-4 h-4" />;
-      case 'pendente': return <Clock className="w-4 h-4" />;
-      case 'atrasada': return <AlertTriangle className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
+      case 'concluida': return <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
+      case 'pendente': return <Clock className="w-4 h-4 text-orange-500" />;
+      case 'atrasada': return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      default: return <Clock className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getAlertIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'critico': return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      case 'atraso': return <Clock className="w-4 h-4 text-orange-500" />;
+      case 'alerta': return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
+      default: return <AlertTriangle className="w-4 h-4 text-gray-500" />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Sistema OS Ativa</h1>
-            <p className="text-sm text-gray-600">Plataforma de Gestão de Qualidade e Conformidade</p>
+    <div className="flex min-h-screen bg-slate-50">
+      <Sidebar />
+      
+      <div className="flex-1">
+        <Header />
+        
+        <main className="p-6">
+          {/* Cards de Estatísticas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+            <Card className="bg-white">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">Total de OS</CardTitle>
+                <FileText className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-slate-900">{stats.osTotal}</div>
+                <p className="text-xs text-emerald-600 mt-1">+12% vs. mês anterior</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">Concluídas Hoje</CardTitle>
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-slate-900">{stats.osConcluidas}</div>
+                <p className="text-xs text-emerald-600 mt-1">+8% vs. mês anterior</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">Pendentes</CardTitle>
+                <Clock className="h-4 w-4 text-orange-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-slate-900">{stats.osPendentes}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">Em Atraso</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-slate-900">{stats.osAtrasadas}</div>
+                <p className="text-xs text-red-600 mt-1">+25% vs. mês anterior</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">Alertas Críticos</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-slate-900">{stats.alertasCriticos}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">Taxa de Conformidade</CardTitle>
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-slate-900">{stats.conformidade}%</div>
+                <p className="text-xs text-emerald-600 mt-1">+2.1% vs. mês anterior</p>
+              </CardContent>
+            </Card>
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <Users className="w-4 h-4 mr-2" />
-              Usuário: Admin
-            </Button>
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Configurações
-            </Button>
-          </div>
-        </div>
-      </header>
 
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total de OS</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats.osTotal}</div>
-              <p className="text-xs text-gray-500 mt-1">Este mês</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-orange-500 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Pendentes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.osPendentes}</div>
-              <p className="text-xs text-gray-500 mt-1">Aguardando execução</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Concluídas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.osConcluidas}</div>
-              <p className="text-xs text-gray-500 mt-1">No prazo</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Em Atraso</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.osAtrasadas}</div>
-              <p className="text-xs text-gray-500 mt-1">Requer atenção</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Conformidade Geral */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-                Conformidade Geral
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="text-3xl font-bold text-green-600">{stats.conformidade}%</div>
-                <Progress value={stats.conformidade} className="h-2" />
-                <p className="text-sm text-gray-600">Meta: 95% | Atual: {stats.conformidade}%</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Alertas Ativos */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-                Alertas Ativos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {alertas.slice(0, 2).map((alerta) => (
-                  <div key={alerta.id} className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-red-800">{alerta.tipo}</p>
-                        <p className="text-sm text-red-600">{alerta.setor}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-red-800">{alerta.valor}</p>
-                        <p className="text-xs text-red-600">Limite: {alerta.limite}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Atividade Recente */}
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-slate-900">Atividade Recente</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {atividadeRecente.map((item) => (
+                    <div key={item.id} className="flex items-start gap-3">
+                      {getStatusIcon(item.status)}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-900">{item.titulo}</p>
+                        <p className="text-xs text-slate-600">{item.responsavel}</p>
+                        <p className="text-xs text-slate-500">{item.data}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
-                <Button variant="outline" size="sm" className="w-full">
-                  Ver Todos os Alertas
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ações Rápidas */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle>Ações Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Link to="/create-os">
-                  <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Nova Ordem de Serviço
-                  </Button>
-                </Link>
-                <Link to="/parameters">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Configurar Parâmetros
-                  </Button>
-                </Link>
-                <Link to="/reports">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Gerar Relatório Mensal
-                  </Button>
-                </Link>
-                <Link to="/quality-control">
-                  <Button variant="outline" className="w-full justify-start">
-                    <ShieldCheck className="w-4 h-4 mr-2" />
-                    Controle de Qualidade
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Ordens de Serviço Recentes */}
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle>Ordens de Serviço Recentes</CardTitle>
-            <CardDescription>Acompanhe o status das suas OS mais recentes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {osRecentes.map((os) => (
-                <div key={os.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    {getStatusIcon(os.status)}
-                    <div>
-                      <h4 className="font-medium text-gray-900">{os.titulo}</h4>
-                      <p className="text-sm text-gray-600">Responsável: {os.responsavel}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">Prazo</p>
-                      <p className="text-sm font-medium">{new Date(os.prazo).toLocaleDateString('pt-BR')}</p>
-                    </div>
-                    <Badge className={getStatusColor(os.status)}>
-                      {os.status.charAt(0).toUpperCase() + os.status.slice(1)}
-                    </Badge>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="mt-6 text-center">
-              <Link to="/orders">
-                <Button variant="outline">Ver Todas as Ordens de Serviço</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+
+            {/* Alertas Recentes */}
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-slate-900">Alertas Recentes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {alertasRecentes.map((alerta) => (
+                    <div key={alerta.id} className="flex items-start gap-3">
+                      {getAlertIcon(alerta.tipo)}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-900">{alerta.titulo}</p>
+                        <p className="text-xs text-slate-600">{alerta.descricao}</p>
+                        <p className="text-xs text-slate-500">{alerta.data}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ações Rápidas */}
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-slate-900">Ações Rápidas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
+                  <Link to="/create-os">
+                    <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
+                      <FilePlus className="w-8 h-8 mx-auto mb-2 text-emerald-600" />
+                      <p className="text-sm font-medium text-slate-900">Nova OS</p>
+                      <p className="text-xs text-slate-600">Criar ordem de serviço</p>
+                    </Card>
+                  </Link>
+                  
+                  <Link to="/parameters">
+                    <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
+                      <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                      <p className="text-sm font-medium text-slate-900">Registrar Parâmetro</p>
+                      <p className="text-xs text-slate-600">Inserir valores monitorados</p>
+                    </Card>
+                  </Link>
+                  
+                  <Link to="/reports">
+                    <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer bg-slate-50">
+                      <BarChart3 className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                      <p className="text-sm font-medium text-slate-900">Gerar Relatório</p>
+                      <p className="text-xs text-slate-600">Relatório consolidado</p>
+                    </Card>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
     </div>
   );
