@@ -14,7 +14,151 @@ export type Database = {
   }
   public: {
     Tables: {
-      controle_qualidade: {
+      assinaturas_semanais: {
+        Row: {
+          assinatura: string | null
+          data: string | null
+          id: string
+          semana: number | null
+          user_id: string | null
+        }
+        Insert: {
+          assinatura?: string | null
+          data?: string | null
+          id?: string
+          semana?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          assinatura?: string | null
+          data?: string | null
+          id?: string
+          semana?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assinaturas_semanais_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cabecalho: {
+        Row: {
+          aprovado_por: string | null
+          cnpj: string | null
+          codigo_documento: string | null
+          elaborado_em: string | null
+          elaborado_por: string | null
+          frequencia: string | null
+          id: string
+          nome_empresa: string
+          nome_planilha: string
+          revisado_em: string | null
+          revisao: string | null
+          user_id: string | null
+        }
+        Insert: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cabecalho_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cabecalho_limpeza: {
+        Row: {
+          aprovado_por: string | null
+          cnpj: string | null
+          codigo_documento: string | null
+          elaborado_em: string | null
+          elaborado_por: string | null
+          frequencia: string | null
+          id: string
+          mes_ano: string | null
+          nome_empresa: string
+          nome_planilha: string
+          revisado_em: string | null
+          revisao: string | null
+          setor: string | null
+          user_id: string | null
+        }
+        Insert: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          mes_ano?: string | null
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+          setor?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          mes_ano?: string | null
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+          setor?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cabecalho_limpeza_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cabecalho_recebimento: {
         Row: {
           assinatura: string | null
           codigo_doc: string | null
@@ -59,13 +203,66 @@ export type Database = {
         }
         Relationships: []
       }
-      itens_controle: {
+      cabecalho_temperatura_umidade: {
         Row: {
-          controle_id: string
+          aprovado_por: string | null
+          cnpj: string | null
+          codigo_documento: string | null
+          elaborado_em: string | null
+          elaborado_por: string | null
+          frequencia: string | null
+          id: string
+          nome_empresa: string
+          nome_planilha: string
+          revisado_em: string | null
+          revisao: string | null
+          user_id: string | null
+        }
+        Insert: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          aprovado_por?: string | null
+          cnpj?: string | null
+          codigo_documento?: string | null
+          elaborado_em?: string | null
+          elaborado_por?: string | null
+          frequencia?: string | null
+          id?: string
+          nome_empresa?: string
+          nome_planilha?: string
+          revisado_em?: string | null
+          revisao?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cabecalho_temperatura_umidade_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      controle_recebimentos: {
+        Row: {
           created_at: string
           data_recebimento: string
           fornecedor: string | null
           id: string
+          id_cabecalho: string
           lote: string | null
           observacoes: string | null
           produto_recebido: string
@@ -74,11 +271,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          controle_id: string
           created_at?: string
           data_recebimento: string
           fornecedor?: string | null
           id?: string
+          id_cabecalho: string
           lote?: string | null
           observacoes?: string | null
           produto_recebido: string
@@ -87,11 +284,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          controle_id?: string
           created_at?: string
           data_recebimento?: string
           fornecedor?: string | null
           id?: string
+          id_cabecalho?: string
           lote?: string | null
           observacoes?: string | null
           produto_recebido?: string
@@ -101,10 +298,236 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "itens_controle_controle_id_fkey"
-            columns: ["controle_id"]
+            foreignKeyName: "controle_recebimentos_id_cabecalho_fkey"
+            columns: ["id_cabecalho"]
             isOneToOne: false
-            referencedRelation: "controle_qualidade"
+            referencedRelation: "cabecalho_recebimento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      limpeza_detalhada: {
+        Row: {
+          assinatura: string | null
+          data: string | null
+          id: string
+          id_cabecalho: string | null
+          limpeza_pia: boolean | null
+          limpeza_piso: boolean | null
+          limpeza_vasos_sanitarios: boolean | null
+          lixeiras_limpas: boolean | null
+          reposicao_kit_higiene: boolean | null
+          reposicao_papel_higienico: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          assinatura?: string | null
+          data?: string | null
+          id?: string
+          id_cabecalho?: string | null
+          limpeza_pia?: boolean | null
+          limpeza_piso?: boolean | null
+          limpeza_vasos_sanitarios?: boolean | null
+          lixeiras_limpas?: boolean | null
+          reposicao_kit_higiene?: boolean | null
+          reposicao_papel_higienico?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          assinatura?: string | null
+          data?: string | null
+          id?: string
+          id_cabecalho?: string | null
+          limpeza_pia?: boolean | null
+          limpeza_piso?: boolean | null
+          limpeza_vasos_sanitarios?: boolean | null
+          lixeiras_limpas?: boolean | null
+          reposicao_kit_higiene?: boolean | null
+          reposicao_papel_higienico?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "limpeza_detalhada_id_cabecalho_fkey"
+            columns: ["id_cabecalho"]
+            isOneToOne: false
+            referencedRelation: "cabecalho_limpeza"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "limpeza_detalhada_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      limpeza_instalacoes: {
+        Row: {
+          id: string
+          id_assinaturas_semanais: string | null
+          id_cabecalho: string | null
+          instalacao: string | null
+          periodicidade: string | null
+          responsavel_verificacao: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          id_assinaturas_semanais?: string | null
+          id_cabecalho?: string | null
+          instalacao?: string | null
+          periodicidade?: string | null
+          responsavel_verificacao?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          id_assinaturas_semanais?: string | null
+          id_cabecalho?: string | null
+          instalacao?: string | null
+          periodicidade?: string | null
+          responsavel_verificacao?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "limpeza_instalacoes_id_assinaturas_semanais_fkey"
+            columns: ["id_assinaturas_semanais"]
+            isOneToOne: false
+            referencedRelation: "assinaturas_semanais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "limpeza_instalacoes_id_cabecalho_fkey"
+            columns: ["id_cabecalho"]
+            isOneToOne: false
+            referencedRelation: "cabecalho_limpeza"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "limpeza_instalacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nao_conformidades: {
+        Row: {
+          acoes_corretivas: string | null
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          medidas_preventivas: string | null
+          responsavel: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acoes_corretivas?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          medidas_preventivas?: string | null
+          responsavel?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acoes_corretivas?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          medidas_preventivas?: string | null
+          responsavel?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nao_conformidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      registros_temperatura_umidade: {
+        Row: {
+          criado_em: string | null
+          data_hora: string
+          id: string
+          id_cabecalho: string | null
+          id_nao_conformidade: string | null
+          temperatura: number | null
+          umidade: number | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          data_hora: string
+          id?: string
+          id_cabecalho?: string | null
+          id_nao_conformidade?: string | null
+          temperatura?: number | null
+          umidade?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          data_hora?: string
+          id?: string
+          id_cabecalho?: string | null
+          id_nao_conformidade?: string | null
+          temperatura?: number | null
+          umidade?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registros_temperatura_umidade_id_cabecalho_fkey"
+            columns: ["id_cabecalho"]
+            isOneToOne: false
+            referencedRelation: "cabecalho_temperatura_umidade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registros_temperatura_umidade_id_nao_conformidade_fkey"
+            columns: ["id_nao_conformidade"]
+            isOneToOne: false
+            referencedRelation: "nao_conformidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registros_temperatura_umidade_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
