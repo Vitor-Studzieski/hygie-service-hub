@@ -296,12 +296,12 @@ const Orders = () => {
                     )}
 
                     {/* Ações */}
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         <Eye className="w-4 h-4 mr-1" />
                         Visualizar
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         <Edit className="w-4 h-4 mr-1" />
                         Editar
                       </Button>
@@ -310,14 +310,14 @@ const Orders = () => {
                           variant="outline" 
                           size="sm" 
                           onClick={() => downloadOrdemPlanilha(ordem)}
-                          className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                          className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
                         >
                           <Download className="w-4 h-4 mr-1" />
                           Baixar Planilha
                         </Button>
                       )}
                       {ordem.status === 'pendente' && (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
                           <CheckCircle2 className="w-4 h-4 mr-1" />
                           Concluir
                         </Button>
