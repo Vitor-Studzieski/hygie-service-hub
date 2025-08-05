@@ -334,7 +334,62 @@ const Orders = () => {
             <div className="space-y-4">
               {filteredOrdens.filter(o => o.status === 'pendente').map((ordem) => (
                 <Card key={ordem.id} className="hover:shadow-md transition-shadow">
-                  {/* Mesmo conteúdo do card acima */}
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          {getStatusIcon(ordem.status)}
+                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
+                          <Badge className={getPriorityColor(ordem.prioridade)}>
+                            {ordem.prioridade.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <span><strong>Setor:</strong> {ordem.setor}</span>
+                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
+                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
+                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Badge className={getStatusColor(ordem.status)}>
+                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Parâmetros */}
+                    {ordem.parametros.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {ordem.parametros.map((param, index) => (
+                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
+                              <span className="font-medium">{param.nome}:</span> {param.valor} 
+                              <span className="text-gray-500 ml-1">({param.limite})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ações */}
+                    <div className="flex flex-col sm:flex-row justify-end gap-2">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Eye className="w-4 h-4 mr-1" />
+                        Visualizar
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Concluir
+                      </Button>
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>
@@ -344,7 +399,67 @@ const Orders = () => {
             <div className="space-y-4">
               {filteredOrdens.filter(o => o.status === 'concluida').map((ordem) => (
                 <Card key={ordem.id} className="hover:shadow-md transition-shadow">
-                  {/* Mesmo conteúdo do card acima */}
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          {getStatusIcon(ordem.status)}
+                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
+                          <Badge className={getPriorityColor(ordem.prioridade)}>
+                            {ordem.prioridade.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <span><strong>Setor:</strong> {ordem.setor}</span>
+                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
+                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
+                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Badge className={getStatusColor(ordem.status)}>
+                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Parâmetros */}
+                    {ordem.parametros.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {ordem.parametros.map((param, index) => (
+                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
+                              <span className="font-medium">{param.nome}:</span> {param.valor} 
+                              <span className="text-gray-500 ml-1">({param.limite})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ações */}
+                    <div className="flex flex-col sm:flex-row justify-end gap-2">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Eye className="w-4 h-4 mr-1" />
+                        Visualizar
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => downloadOrdemPlanilha(ordem)}
+                        className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Baixar Planilha
+                      </Button>
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>
@@ -354,7 +469,62 @@ const Orders = () => {
             <div className="space-y-4">
               {filteredOrdens.filter(o => o.status === 'atrasada').map((ordem) => (
                 <Card key={ordem.id} className="hover:shadow-md transition-shadow border-l-4 border-l-red-500">
-                  {/* Mesmo conteúdo do card acima */}
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          {getStatusIcon(ordem.status)}
+                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
+                          <Badge className={getPriorityColor(ordem.prioridade)}>
+                            {ordem.prioridade.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <span><strong>Setor:</strong> {ordem.setor}</span>
+                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
+                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
+                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Badge className={getStatusColor(ordem.status)}>
+                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Parâmetros */}
+                    {ordem.parametros.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {ordem.parametros.map((param, index) => (
+                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
+                              <span className="font-medium">{param.nome}:</span> {param.valor} 
+                              <span className="text-gray-500 ml-1">({param.limite})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ações */}
+                    <div className="flex flex-col sm:flex-row justify-end gap-2">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Eye className="w-4 h-4 mr-1" />
+                        Visualizar
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Concluir
+                      </Button>
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>
