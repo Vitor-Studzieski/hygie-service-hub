@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,16 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Search, Filter, CheckCircle2, Clock, AlertTriangle, FileText, Edit, Eye, Download } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
-import { Link } from "react-router-dom";
 
 const Orders = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("todas");
   const [filterSetor, setFilterSetor] = useState("todos");
-
-  // Mock data - em produção viria do backend
-  const ordens = [
+  const [ordens, setOrdens] = useState([
     {
       id: 1,
       titulo: "Controle de Umidade - Setor A",
@@ -68,7 +68,7 @@ const Orders = () => {
       prazo: "2025-07-04",
       parametros: [{ nome: "pH", valor: "6.8", limite: "6.0-7.0", status: "ok" }]
     }
-  ];
+  ]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -115,7 +115,6 @@ const Orders = () => {
   };
 
   const downloadOrdemPlanilha = (ordem: any) => {
-    // Dados da ordem de serviço
     const dadosOrdem = [
       ['ORDEM DE SERVIÇO', ''],
       ['', ''],
@@ -134,7 +133,6 @@ const Orders = () => {
       ['', '']
     ];
 
-    // Adiciona os parâmetros se houver
     if (ordem.parametros.length > 0) {
       dadosOrdem.push(['Parâmetro', 'Valor', 'Limite', 'Status']);
       ordem.parametros.forEach((param: any) => {
@@ -144,11 +142,9 @@ const Orders = () => {
       dadosOrdem.push(['Nenhum parâmetro monitorado', '', '', '']);
     }
 
-    // Criar planilha
     const ws = XLSX.utils.aoa_to_sheet(dadosOrdem);
     const wb = XLSX.utils.book_new();
     
-    // Configurar largura das colunas
     ws['!cols'] = [
       { width: 25 },
       { width: 20 },
@@ -157,13 +153,118 @@ const Orders = () => {
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, "Ordem de Serviço");
-    
-    // Nome do arquivo
     const nomeArquivo = `OS_${ordem.id}_${ordem.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
-    
-    // Download
     XLSX.writeFile(wb, nomeArquivo);
   };
+
+  const handleConcluirOrdem = (ordemId: number) => {
+    setOrdens(ordens.map(ordem => 
+      ordem.id === ordemId 
+        ? { ...ordem, status: 'concluida' }
+        : ordem
+    ));
+    
+    toast({
+      title: "Ordem concluída!",
+      description: "A ordem de serviço foi marcada como concluída.",
+    });
+  };
+
+  const handleVisualizarOrdem = (ordemId: number) => {
+    navigate(`/view-order/${ordemId}`);
+  };
+
+  const handleEditarOrdem = (ordemId: number) => {
+    navigate(`/edit-order/${ordemId}`);
+  };
+
+  const renderOrderCard = (ordem: any) => (
+    <Card key={ordem.id} className="hover:shadow-md transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              {getStatusIcon(ordem.status)}
+              <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
+              <Badge className={getPriorityColor(ordem.prioridade)}>
+                {ordem.prioridade.toUpperCase()}
+              </Badge>
+            </div>
+            <p className="text-gray-600 mb-3">{ordem.descricao}</p>
+            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+              <span><strong>Setor:</strong> {ordem.setor}</span>
+              <span><strong>Responsável:</strong> {ordem.responsavel}</span>
+              <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
+              <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            <Badge className={getStatusColor(ordem.status)}>
+              {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Parâmetros */}
+        {ordem.parametros.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
+            <div className="flex flex-wrap gap-2">
+              {ordem.parametros.map((param: any, index: number) => (
+                <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
+                  <span className="font-medium">{param.nome}:</span> {param.valor} 
+                  <span className="text-gray-500 ml-1">({param.limite})</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Ações */}
+        <div className="flex flex-col sm:flex-row justify-end gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full sm:w-auto"
+            onClick={() => handleVisualizarOrdem(ordem.id)}
+          >
+            <Eye className="w-4 h-4 mr-1" />
+            Visualizar
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full sm:w-auto"
+            onClick={() => handleEditarOrdem(ordem.id)}
+          >
+            <Edit className="w-4 h-4 mr-1" />
+            Editar
+          </Button>
+          {ordem.status === 'concluida' && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => downloadOrdemPlanilha(ordem)}
+              className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              Baixar Planilha
+            </Button>
+          )}
+          {(ordem.status === 'pendente' || ordem.status === 'atrasada') && (
+            <Button 
+              size="sm" 
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+              onClick={() => handleConcluirOrdem(ordem.id)}
+            >
+              <CheckCircle2 className="w-4 h-4 mr-1" />
+              Concluir
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -253,279 +354,28 @@ const Orders = () => {
 
           <TabsContent value="todas" className="mt-6">
             <div className="space-y-4">
-              {filteredOrdens.map((ordem) => (
-                <Card key={ordem.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          {getStatusIcon(ordem.status)}
-                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
-                          <Badge className={getPriorityColor(ordem.prioridade)}>
-                            {ordem.prioridade.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span><strong>Setor:</strong> {ordem.setor}</span>
-                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
-                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
-                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge className={getStatusColor(ordem.status)}>
-                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Parâmetros */}
-                    {ordem.parametros.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {ordem.parametros.map((param, index) => (
-                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
-                              <span className="font-medium">{param.nome}:</span> {param.valor} 
-                              <span className="text-gray-500 ml-1">({param.limite})</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Ações */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-2">
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Eye className="w-4 h-4 mr-1" />
-                        Visualizar
-                      </Button>
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
-                      {ordem.status === 'concluida' && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => downloadOrdemPlanilha(ordem)}
-                          className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Baixar Planilha
-                        </Button>
-                      )}
-                      {ordem.status === 'pendente' && (
-                        <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
-                          <CheckCircle2 className="w-4 h-4 mr-1" />
-                          Concluir
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {filteredOrdens.map((ordem) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
-          {/* Outros tabs teriam conteúdo similar, filtrado por status */}
           <TabsContent value="pendentes">
             <div className="space-y-4">
-              {filteredOrdens.filter(o => o.status === 'pendente').map((ordem) => (
-                <Card key={ordem.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          {getStatusIcon(ordem.status)}
-                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
-                          <Badge className={getPriorityColor(ordem.prioridade)}>
-                            {ordem.prioridade.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span><strong>Setor:</strong> {ordem.setor}</span>
-                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
-                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
-                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge className={getStatusColor(ordem.status)}>
-                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Parâmetros */}
-                    {ordem.parametros.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {ordem.parametros.map((param, index) => (
-                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
-                              <span className="font-medium">{param.nome}:</span> {param.valor} 
-                              <span className="text-gray-500 ml-1">({param.limite})</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Ações */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-2">
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Eye className="w-4 h-4 mr-1" />
-                        Visualizar
-                      </Button>
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
-                        <CheckCircle2 className="w-4 h-4 mr-1" />
-                        Concluir
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {filteredOrdens.filter(o => o.status === 'pendente').map((ordem) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="concluidas">
             <div className="space-y-4">
-              {filteredOrdens.filter(o => o.status === 'concluida').map((ordem) => (
-                <Card key={ordem.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          {getStatusIcon(ordem.status)}
-                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
-                          <Badge className={getPriorityColor(ordem.prioridade)}>
-                            {ordem.prioridade.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span><strong>Setor:</strong> {ordem.setor}</span>
-                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
-                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
-                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge className={getStatusColor(ordem.status)}>
-                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Parâmetros */}
-                    {ordem.parametros.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {ordem.parametros.map((param, index) => (
-                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
-                              <span className="font-medium">{param.nome}:</span> {param.valor} 
-                              <span className="text-gray-500 ml-1">({param.limite})</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Ações */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-2">
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Eye className="w-4 h-4 mr-1" />
-                        Visualizar
-                      </Button>
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => downloadOrdemPlanilha(ordem)}
-                        className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        Baixar Planilha
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {filteredOrdens.filter(o => o.status === 'concluida').map((ordem) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="atrasadas">
             <div className="space-y-4">
               {filteredOrdens.filter(o => o.status === 'atrasada').map((ordem) => (
-                <Card key={ordem.id} className="hover:shadow-md transition-shadow border-l-4 border-l-red-500">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          {getStatusIcon(ordem.status)}
-                          <h3 className="text-lg font-semibold text-gray-900">{ordem.titulo}</h3>
-                          <Badge className={getPriorityColor(ordem.prioridade)}>
-                            {ordem.prioridade.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-3">{ordem.descricao}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span><strong>Setor:</strong> {ordem.setor}</span>
-                          <span><strong>Responsável:</strong> {ordem.responsavel}</span>
-                          <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
-                          <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge className={getStatusColor(ordem.status)}>
-                          {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Parâmetros */}
-                    {ordem.parametros.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Parâmetros Monitorados:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {ordem.parametros.map((param, index) => (
-                            <div key={index} className="bg-green-50 border border-green-200 rounded px-3 py-1 text-sm">
-                              <span className="font-medium">{param.nome}:</span> {param.valor} 
-                              <span className="text-gray-500 ml-1">({param.limite})</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Ações */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-2">
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Eye className="w-4 h-4 mr-1" />
-                        Visualizar
-                      </Button>
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
-                        <CheckCircle2 className="w-4 h-4 mr-1" />
-                        Concluir
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div key={ordem.id} className="border-l-4 border-l-red-500">
+                  {renderOrderCard(ordem)}
+                </div>
               ))}
             </div>
           </TabsContent>

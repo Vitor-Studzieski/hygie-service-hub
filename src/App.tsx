@@ -11,6 +11,8 @@ import Orders from "./pages/Orders";
 import Parameters from "./pages/Parameters";
 import Reports from "./pages/Reports";
 import Indicators from "./pages/Indicators";
+import ViewOrder from "./pages/ViewOrder";
+import EditOrder from "./pages/EditOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/create-os" element={<CreateOS />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/view-order/:id" element={<ViewOrder />} />
+            <Route path="/edit-order/:id" element={<EditOrder />} />
             <Route path="/parameters" element={<Parameters />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/quality-control" element={<Indicators />} />
