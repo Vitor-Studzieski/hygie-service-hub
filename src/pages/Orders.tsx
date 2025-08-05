@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Search, Filter, CheckCircle2, Clock, AlertTriangle, FileText, Edit, Eye } from "lucide-react";
+import { ArrowLeft, Search, Filter, CheckCircle2, Clock, AlertTriangle, FileText, Edit, Eye, Download } from "lucide-react";
+import * as XLSX from 'xlsx';
 import { Link } from "react-router-dom";
 
 const Orders = () => {
@@ -111,6 +112,57 @@ const Orders = () => {
     pendentes: ordens.filter(o => o.status === 'pendente').length,
     concluidas: ordens.filter(o => o.status === 'concluida').length,
     atrasadas: ordens.filter(o => o.status === 'atrasada').length
+  };
+
+  const downloadOrdemPlanilha = (ordem: any) => {
+    // Dados da ordem de serviço
+    const dadosOrdem = [
+      ['ORDEM DE SERVIÇO', ''],
+      ['', ''],
+      ['ID:', ordem.id],
+      ['Título:', ordem.titulo],
+      ['Descrição:', ordem.descricao],
+      ['Status:', ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)],
+      ['Prioridade:', ordem.prioridade.charAt(0).toUpperCase() + ordem.prioridade.slice(1)],
+      ['Setor:', ordem.setor],
+      ['Responsável:', ordem.responsavel],
+      ['Data de Criação:', new Date(ordem.criado).toLocaleDateString('pt-BR')],
+      ['Prazo:', new Date(ordem.prazo).toLocaleDateString('pt-BR')],
+      ['Data de Conclusão:', new Date().toLocaleDateString('pt-BR')],
+      ['', ''],
+      ['PARÂMETROS MONITORADOS', ''],
+      ['', '']
+    ];
+
+    // Adiciona os parâmetros se houver
+    if (ordem.parametros.length > 0) {
+      dadosOrdem.push(['Parâmetro', 'Valor', 'Limite', 'Status']);
+      ordem.parametros.forEach((param: any) => {
+        dadosOrdem.push([param.nome, param.valor, param.limite, param.status]);
+      });
+    } else {
+      dadosOrdem.push(['Nenhum parâmetro monitorado', '', '', '']);
+    }
+
+    // Criar planilha
+    const ws = XLSX.utils.aoa_to_sheet(dadosOrdem);
+    const wb = XLSX.utils.book_new();
+    
+    // Configurar largura das colunas
+    ws['!cols'] = [
+      { width: 25 },
+      { width: 20 },
+      { width: 15 },
+      { width: 10 }
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Ordem de Serviço");
+    
+    // Nome do arquivo
+    const nomeArquivo = `OS_${ordem.id}_${ordem.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+    
+    // Download
+    XLSX.writeFile(wb, nomeArquivo);
   };
 
   return (
@@ -253,6 +305,17 @@ const Orders = () => {
                         <Edit className="w-4 h-4 mr-1" />
                         Editar
                       </Button>
+                      {ordem.status === 'concluida' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => downloadOrdemPlanilha(ordem)}
+                          className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Baixar Planilha
+                        </Button>
+                      )}
                       {ordem.status === 'pendente' && (
                         <Button size="sm" className="bg-green-600 hover:bg-green-700">
                           <CheckCircle2 className="w-4 h-4 mr-1" />
