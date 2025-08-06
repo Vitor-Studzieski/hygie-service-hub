@@ -5,8 +5,12 @@ import {
   AlertTriangle, 
   BarChart3, 
   Users, 
-  Settings 
+  Settings,
+  LogOut,
+  Plus
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 import {
   Sidebar,
@@ -24,6 +28,11 @@ const items = [
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Criar OS",
+    url: "/create-os",
+    icon: Plus,
   },
   {
     title: "Ordens de Serviço",
@@ -50,20 +59,20 @@ const items = [
     url: "/users",
     icon: Users,
   },
-  {
-    title: "Configurações",
-    url: "/settings",
-    icon: Settings,
-  },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { signOut, user } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-emerald-600 text-white border-r-2 border-emerald-400" : "text-slate-300 hover:bg-slate-800 hover:text-white";
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <Sidebar
@@ -98,6 +107,22 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* User info and logout at bottom */}
+        <div className="mt-auto p-4 border-t border-slate-700">
+          <div className="text-xs text-slate-400 mb-2">
+            {user?.email}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleSignOut}
+            className="w-full justify-start text-slate-300 hover:bg-slate-800 hover:text-white"
+          >
+            <LogOut className="mr-3 h-4 w-4" />
+            Sair
+          </Button>
+        </div>
       </SidebarContent>
     </Sidebar>
   );
