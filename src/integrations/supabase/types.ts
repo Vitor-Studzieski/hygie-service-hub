@@ -538,6 +538,98 @@ export type Database = {
           },
         ]
       }
+      service_order_parameters: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          nome: string
+          order_id: string
+          unidade: string | null
+          user_id: string | null
+          valor_maximo: number | null
+          valor_minimo: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          nome: string
+          order_id: string
+          unidade?: string | null
+          user_id?: string | null
+          valor_maximo?: number | null
+          valor_minimo?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          nome?: string
+          order_id?: string
+          unidade?: string | null
+          user_id?: string | null
+          valor_maximo?: number | null
+          valor_minimo?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_parameters_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          descricao: string | null
+          frequencia: string | null
+          id: string
+          prazo: string | null
+          prioridade: string
+          recorrente: boolean
+          responsavel: string
+          setor: string
+          status: string
+          titulo: string
+          user_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          frequencia?: string | null
+          id?: string
+          prazo?: string | null
+          prioridade: string
+          recorrente?: boolean
+          responsavel: string
+          setor: string
+          status?: string
+          titulo: string
+          user_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          frequencia?: string | null
+          id?: string
+          prazo?: string | null
+          prioridade?: string
+          recorrente?: boolean
+          responsavel?: string
+          setor?: string
+          status?: string
+          titulo?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

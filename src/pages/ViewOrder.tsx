@@ -3,72 +3,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle2, Clock, AlertTriangle, Edit, Download } from "lucide-react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import * as XLSX from 'xlsx';
+import { supabase } from "@/integrations/supabase/client";
 
 const ViewOrder = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const { id } = useParams();
   const [ordem, setOrdem] = useState<any>(null);
 
-  // Mock data - em produção viria do backend
-  const ordens = [
-    {
-      id: 1,
-      titulo: "Controle de Umidade - Setor A",
-      descricao: "Verificação diária dos níveis de umidade no setor de produção A",
-      status: "pendente",
-      prioridade: "alta",
-      setor: "Produção A",
-      responsavel: "João Silva",
-      criado: "2025-07-01",
-      prazo: "2025-07-03",
-      parametros: [{ nome: "Umidade", valor: "75%", limite: "60-80%", status: "ok" }]
-    },
-    {
-      id: 2,
-      titulo: "Verificação Temperatura Câmara Fria",
-      descricao: "Monitoramento da temperatura nas câmaras de conservação",
-      status: "concluida",
-      prioridade: "critica",
-      setor: "Estoque",
-      responsavel: "Maria Santos",
-      criado: "2025-07-01",
-      prazo: "2025-07-02",
-      parametros: [
-        { nome: "Temperatura", valor: "4°C", limite: "2-6°C", status: "ok" },
-        { nome: "Umidade", valor: "90%", limite: "85-95%", status: "ok" }
-      ]
-    },
-    {
-      id: 3,
-      titulo: "Limpeza e Desinfecção",
-      descricao: "Procedimento de higienização completa da área de produção",
-      status: "atrasada",
-      prioridade: "media",
-      setor: "Produção B",
-      responsavel: "Pedro Lima",
-      criado: "2025-06-30",
-      prazo: "2025-07-01",
-      parametros: []
-    },
-    {
-      id: 4,
-      titulo: "Calibração de Equipamentos",
-      descricao: "Verificação e calibração dos instrumentos de medição",
-      status: "pendente",
-      prioridade: "alta",
-      setor: "Laboratório",
-      responsavel: "Ana Costa",
-      criado: "2025-07-02",
-      prazo: "2025-07-04",
-      parametros: [{ nome: "pH", valor: "6.8", limite: "6.0-7.0", status: "ok" }]
-    }
-  ];
-
   useEffect(() => {
-    const foundOrdem = ordens.find(o => o.id === parseInt(id || '0'));
-    setOrdem(foundOrdem);
+    const fetchOrder = async () => {
+      if (!id) return;
+      const { data, error } = await supabase
+        .from('service_orders')
+        .select('*, service_order_parameters(*)')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) return;
+      if (data) {
+        setOrdem({
+          id: data.id,
+          titulo: data.titulo,
+          descricao: data.descricao,
+          status: data.status,
+          prioridade: data.prioridade,
+          setor: data.setor,
+          responsavel: data.responsavel,
+          criado: data.criado_em,
+          prazo: data.prazo,
+          parametros: (data.service_order_parameters || []).map((p: any) => ({
+            nome: p.nome,
+            valor: '-',
+            limite: `${p.valor_minimo ?? ''}-${p.valor_maximo ?? ''} ${p.unidade ?? ''}`.trim(),
+            status: '-',
+          }))
+        });
+      }
+    };
+    fetchOrder();
   }, [id]);
 
   const getStatusColor = (status: string) => {
@@ -173,7 +145,7 @@ const ViewOrder = () => {
             <h1 className="text-2xl font-bold text-gray-900">Ordem de Serviço #{ordem.id}</h1>
             <p className="text-sm text-gray-600">Detalhes da ordem de serviço</p>
           </div>
-          <div className="flex gap-2">
+<div className="flex gap-2">
             <Link to={`/edit-order/${ordem.id}`}>
               <Button variant="outline">
                 <Edit className="w-4 h-4 mr-2" />

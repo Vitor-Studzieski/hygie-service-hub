@@ -9,6 +9,8 @@ import { ArrowLeft, Search, Filter, CheckCircle2, Clock, AlertTriangle, FileText
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -16,60 +18,47 @@ const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("todas");
   const [filterSetor, setFilterSetor] = useState("todos");
-  const [ordens, setOrdens] = useState([
-    {
-      id: 1,
-      titulo: "Controle de Umidade - Setor A",
-      descricao: "Verificação diária dos níveis de umidade no setor de produção A",
-      status: "pendente",
-      prioridade: "alta",
-      setor: "Produção A",
-      responsavel: "João Silva",
-      criado: "2025-07-01",
-      prazo: "2025-07-03",
-      parametros: [{ nome: "Umidade", valor: "75%", limite: "60-80%", status: "ok" }]
-    },
-    {
-      id: 2,
-      titulo: "Verificação Temperatura Câmara Fria",
-      descricao: "Monitoramento da temperatura nas câmaras de conservação",
-      status: "concluida",
-      prioridade: "critica",
-      setor: "Estoque",
-      responsavel: "Maria Santos",
-      criado: "2025-07-01",
-      prazo: "2025-07-02",
-      parametros: [
-        { nome: "Temperatura", valor: "4°C", limite: "2-6°C", status: "ok" },
-        { nome: "Umidade", valor: "90%", limite: "85-95%", status: "ok" }
-      ]
-    },
-    {
-      id: 3,
-      titulo: "Limpeza e Desinfecção",
-      descricao: "Procedimento de higienização completa da área de produção",
-      status: "atrasada",
-      prioridade: "media",
-      setor: "Produção B",
-      responsavel: "Pedro Lima",
-      criado: "2025-06-30",
-      prazo: "2025-07-01",
-      parametros: []
-    },
-    {
-      id: 4,
-      titulo: "Calibração de Equipamentos",
-      descricao: "Verificação e calibração dos instrumentos de medição",
-      status: "pendente",
-      prioridade: "alta",
-      setor: "Laboratório",
-      responsavel: "Ana Costa",
-      criado: "2025-07-02",
-      prazo: "2025-07-04",
-      parametros: [{ nome: "pH", valor: "6.8", limite: "6.0-7.0", status: "ok" }]
-    }
-  ]);
 
+  // Load orders from Supabase (persisted)
+  const { data: ordens = [], isLoading } = useQuery({
+    queryKey: ["service_orders"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_orders")
+        .select("*, service_order_parameters(*)")
+        .order("criado_em", { ascending: false });
+      if (error) throw error;
+      return (data || []).map((o: any) => ({
+        id: o.id,
+        titulo: o.titulo,
+        descricao: o.descricao,
+        status: o.status,
+        prioridade: o.prioridade,
+        setor: o.setor,
+        responsavel: o.responsavel,
+        criado: o.criado_em,
+        prazo: o.prazo,
+        parametros: (o.service_order_parameters || []).map((p: any) => ({
+          nome: p.nome,
+          valor: "-",
+          limite: `${p.valor_minimo ?? ''}-${p.valor_maximo ?? ''} ${p.unidade ?? ''}`.trim(),
+          status: "-",
+        }))
+      }));
+    },
+  });
+
+  const queryClient = useQueryClient();
+  const concluirMut = useMutation({
+    mutationFn: async (ordemId: string) => {
+      const { error } = await supabase
+        .from("service_orders")
+        .update({ status: "concluida" })
+        .eq("id", ordemId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["service_orders"] }),
+  });
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'concluida': return 'bg-green-100 text-green-800 border-green-200';
@@ -98,7 +87,7 @@ const Orders = () => {
     }
   };
 
-  const filteredOrdens = ordens.filter(ordem => {
+const filteredOrdens = ordens.filter((ordem: any) => {
     const matchesSearch = ordem.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ordem.responsavel.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "todas" || ordem.status === filterStatus;
@@ -107,14 +96,14 @@ const Orders = () => {
     return matchesSearch && matchesStatus && matchesSetor;
   });
 
-  const ordensStats = {
+const ordensStats = {
     todas: ordens.length,
-    pendentes: ordens.filter(o => o.status === 'pendente').length,
-    concluidas: ordens.filter(o => o.status === 'concluida').length,
-    atrasadas: ordens.filter(o => o.status === 'atrasada').length
+    pendentes: ordens.filter((o: any) => o.status === 'pendente').length,
+    concluidas: ordens.filter((o: any) => o.status === 'concluida').length,
+    atrasadas: ordens.filter((o: any) => o.status === 'atrasada').length
   };
 
-  const downloadOrdemPlanilha = (ordem: any) => {
+const downloadOrdemPlanilha = (ordem: any) => {
     const dadosOrdem = [
       ['ORDEM DE SERVIÇO', ''],
       ['', ''],
@@ -126,7 +115,7 @@ const Orders = () => {
       ['Setor:', ordem.setor],
       ['Responsável:', ordem.responsavel],
       ['Data de Criação:', new Date(ordem.criado).toLocaleDateString('pt-BR')],
-      ['Prazo:', new Date(ordem.prazo).toLocaleDateString('pt-BR')],
+      ['Prazo:', ordem.prazo ? new Date(ordem.prazo).toLocaleDateString('pt-BR') : '-'],
       ['Data de Conclusão:', new Date().toLocaleDateString('pt-BR')],
       ['', ''],
       ['PARÂMETROS MONITORADOS', ''],
@@ -136,7 +125,7 @@ const Orders = () => {
     if (ordem.parametros.length > 0) {
       dadosOrdem.push(['Parâmetro', 'Valor', 'Limite', 'Status']);
       ordem.parametros.forEach((param: any) => {
-        dadosOrdem.push([param.nome, param.valor, param.limite, param.status]);
+        dadosOrdem.push([param.nome, param.valor ?? '-', param.limite ?? '-', param.status ?? '-']);
       });
     } else {
       dadosOrdem.push(['Nenhum parâmetro monitorado', '', '', '']);
@@ -144,32 +133,19 @@ const Orders = () => {
 
     const ws = XLSX.utils.aoa_to_sheet(dadosOrdem);
     const wb = XLSX.utils.book_new();
-    
-    ws['!cols'] = [
-      { width: 25 },
-      { width: 20 },
-      { width: 15 },
-      { width: 10 }
-    ];
-
+    ws['!cols'] = [ { width: 25 }, { width: 20 }, { width: 15 }, { width: 10 } ];
     XLSX.utils.book_append_sheet(wb, ws, "Ordem de Serviço");
     const nomeArquivo = `OS_${ordem.id}_${ordem.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
     XLSX.writeFile(wb, nomeArquivo);
   };
 
-  const handleConcluirOrdem = (ordemId: number) => {
-    setOrdens(ordens.map(ordem => 
-      ordem.id === ordemId 
-        ? { ...ordem, status: 'concluida' }
-        : ordem
-    ));
-    
+  const handleConcluirOrdem = (ordemId: any) => {
+    concluirMut.mutate(ordemId);
     toast({
       title: "Ordem concluída!",
       description: "A ordem de serviço foi marcada como concluída.",
     });
   };
-
   const handleVisualizarOrdem = (ordemId: number) => {
     navigate(`/view-order/${ordemId}`);
   };
@@ -197,7 +173,7 @@ const Orders = () => {
               <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
               <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
             </div>
-          </div>
+</div>
           <div className="flex items-center gap-2 ml-4">
             <Badge className={getStatusColor(ordem.status)}>
               {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
@@ -266,7 +242,7 @@ const Orders = () => {
     </Card>
   );
 
-  return (
+return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
@@ -337,7 +313,7 @@ const Orders = () => {
 
         {/* Tabs com Estatísticas */}
         <Tabs defaultValue="todas" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+<TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="todas" className="flex items-center gap-2">
               Todas ({ordensStats.todas})
             </TabsTrigger>
@@ -354,25 +330,25 @@ const Orders = () => {
 
           <TabsContent value="todas" className="mt-6">
             <div className="space-y-4">
-              {filteredOrdens.map((ordem) => renderOrderCard(ordem))}
+{filteredOrdens.map((ordem: any) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="pendentes">
             <div className="space-y-4">
-              {filteredOrdens.filter(o => o.status === 'pendente').map((ordem) => renderOrderCard(ordem))}
+{filteredOrdens.filter((o: any) => o.status === 'pendente').map((ordem: any) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="concluidas">
             <div className="space-y-4">
-              {filteredOrdens.filter(o => o.status === 'concluida').map((ordem) => renderOrderCard(ordem))}
+{filteredOrdens.filter((o: any) => o.status === 'concluida').map((ordem: any) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="atrasadas">
             <div className="space-y-4">
-              {filteredOrdens.filter(o => o.status === 'atrasada').map((ordem) => (
+{filteredOrdens.filter((o: any) => o.status === 'atrasada').map((ordem: any) => (
                 <div key={ordem.id} className="border-l-4 border-l-red-500">
                   {renderOrderCard(ordem)}
                 </div>

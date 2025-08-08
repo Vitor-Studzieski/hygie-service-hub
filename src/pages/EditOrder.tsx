@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Save, Trash2, Plus } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const EditOrder = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     titulo: "",
     descricao: "",
     setor: "",
@@ -25,81 +26,80 @@ const EditOrder = () => {
     parametros: [] as any[]
   });
 
-  // Mock data - em produção viria do backend
-  const ordens = [
-    {
-      id: 1,
-      titulo: "Controle de Umidade - Setor A",
-      descricao: "Verificação diária dos níveis de umidade no setor de produção A",
-      status: "pendente",
-      prioridade: "alta",
-      setor: "Produção A",
-      responsavel: "João Silva",
-      criado: "2025-07-01",
-      prazo: "2025-07-03",
-      parametros: [{ nome: "Umidade", valor: "75%", limite: "60-80%", status: "ok" }]
-    },
-    {
-      id: 2,
-      titulo: "Verificação Temperatura Câmara Fria",
-      descricao: "Monitoramento da temperatura nas câmaras de conservação",
-      status: "concluida",
-      prioridade: "critica",
-      setor: "Estoque",
-      responsavel: "Maria Santos",
-      criado: "2025-07-01",
-      prazo: "2025-07-02",
-      parametros: [
-        { nome: "Temperatura", valor: "4°C", limite: "2-6°C", status: "ok" },
-        { nome: "Umidade", valor: "90%", limite: "85-95%", status: "ok" }
-      ]
-    },
-    {
-      id: 3,
-      titulo: "Limpeza e Desinfecção",
-      descricao: "Procedimento de higienização completa da área de produção",
-      status: "atrasada",
-      prioridade: "media",
-      setor: "Produção B",
-      responsavel: "Pedro Lima",
-      criado: "2025-06-30",
-      prazo: "2025-07-01",
-      parametros: []
-    },
-    {
-      id: 4,
-      titulo: "Calibração de Equipamentos",
-      descricao: "Verificação e calibração dos instrumentos de medição",
-      status: "pendente",
-      prioridade: "alta",
-      setor: "Laboratório",
-      responsavel: "Ana Costa",
-      criado: "2025-07-02",
-      prazo: "2025-07-04",
-      parametros: [{ nome: "pH", valor: "6.8", limite: "6.0-7.0", status: "ok" }]
-    }
-  ];
-
   useEffect(() => {
-    const ordem = ordens.find(o => o.id === parseInt(id || '0'));
-    if (ordem) {
-      setFormData({
-        titulo: ordem.titulo,
-        descricao: ordem.descricao,
-        setor: ordem.setor,
-        responsavel: ordem.responsavel,
-        prioridade: ordem.prioridade,
-        status: ordem.status,
-        prazo: ordem.prazo,
-        parametros: ordem.parametros || []
-      });
-    }
+    const fetchOrder = async () => {
+      if (!id) return;
+      const { data, error } = await supabase
+        .from('service_orders')
+        .select('*, service_order_parameters(*)')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) {
+        toast({ title: 'Erro ao carregar OS', description: error.message, variant: 'destructive' });
+        return;
+      }
+      if (data) {
+        setFormData({
+          titulo: data.titulo || '',
+          descricao: data.descricao || '',
+          setor: data.setor || '',
+          responsavel: data.responsavel || '',
+          prioridade: data.prioridade || '',
+          status: data.status || 'pendente',
+          prazo: data.prazo || '',
+          parametros: (data.service_order_parameters || []).map((p: any) => ({
+            nome: p.nome,
+            min: p.valor_minimo ?? '',
+            max: p.valor_maximo ?? '',
+            unidade: p.unidade ?? '',
+          })),
+        });
+      }
+    };
+    fetchOrder();
   }, [id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Aqui você faria a chamada para o backend para atualizar a ordem
+
+    if (!id) return;
+
+    const { error } = await supabase
+      .from('service_orders')
+      .update({
+        titulo: formData.titulo,
+        descricao: formData.descricao,
+        setor: formData.setor,
+        responsavel: formData.responsavel,
+        prioridade: formData.prioridade,
+        status: formData.status,
+        prazo: formData.prazo,
+      })
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    // Replace parameters: delete all and reinsert
+    await supabase.from('service_order_parameters').delete().eq('order_id', id);
+    const paramsToSave = (formData.parametros || [])
+      .filter((p: any) => p.nome)
+      .map((p: any) => ({
+        order_id: id,
+        nome: p.nome,
+        unidade: p.unidade || null,
+        valor_minimo: p.min ? Number(p.min) : null,
+        valor_maximo: p.max ? Number(p.max) : null,
+      }));
+    if (paramsToSave.length) {
+      const { error: pErr } = await supabase.from('service_order_parameters').insert(paramsToSave);
+      if (pErr) {
+        toast({ title: 'Aviso', description: 'OS salva, mas houve erro nos parâmetros.', variant: 'destructive' });
+      }
+    }
+
     toast({
       title: "Ordem de serviço atualizada!",
       description: "As alterações foram salvas com sucesso.",
@@ -108,10 +108,10 @@ const EditOrder = () => {
     navigate("/orders");
   };
 
-  const addParametro = () => {
+const addParametro = () => {
     setFormData({
       ...formData,
-      parametros: [...formData.parametros, { nome: "", valor: "", limite: "", status: "ok" }]
+      parametros: [...formData.parametros, { nome: "", min: "", max: "", unidade: "" }]
     });
   };
 
@@ -122,8 +122,8 @@ const EditOrder = () => {
     });
   };
 
-  const updateParametro = (index: number, field: string, value: string) => {
-    const newParametros = [...formData.parametros];
+const updateParametro = (index: number, field: string, value: string | number) => {
+    const newParametros: any[] = [...formData.parametros];
     newParametros[index] = { ...newParametros[index], [field]: value };
     setFormData({ ...formData, parametros: newParametros });
   };
@@ -275,10 +275,10 @@ const EditOrder = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {formData.parametros.length > 0 ? (
+{formData.parametros.length > 0 ? (
                 <div className="space-y-4">
-                  {formData.parametros.map((param, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
+                  {formData.parametros.map((param: any, index: number) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
                       <div className="space-y-2">
                         <Label>Nome do Parâmetro</Label>
                         <Input
@@ -288,19 +288,27 @@ const EditOrder = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Valor Atual</Label>
+                        <Label>Valor Mínimo</Label>
                         <Input
-                          value={param.valor}
-                          onChange={(e) => updateParametro(index, 'valor', e.target.value)}
-                          placeholder="Ex: 25°C"
+                          value={param.min}
+                          onChange={(e) => updateParametro(index, 'min', e.target.value)}
+                          placeholder="Ex: 20"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Limite Aceitável</Label>
+                        <Label>Valor Máximo</Label>
                         <Input
-                          value={param.limite}
-                          onChange={(e) => updateParametro(index, 'limite', e.target.value)}
-                          placeholder="Ex: 20-30°C"
+                          value={param.max}
+                          onChange={(e) => updateParametro(index, 'max', e.target.value)}
+                          placeholder="Ex: 30"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Unidade</Label>
+                        <Input
+                          value={param.unidade}
+                          onChange={(e) => updateParametro(index, 'unidade', e.target.value)}
+                          placeholder="Ex: °C"
                         />
                       </div>
                       <div className="space-y-2">

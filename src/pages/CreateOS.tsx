@@ -13,11 +13,12 @@ import { CalendarIcon, ArrowLeft, Save, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const CreateOS = () => {
-  const [titulo, setTitulo] = useState("");
+const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [responsavel, setResponsavel] = useState("");
   const [setor, setSetor] = useState("");
@@ -26,6 +27,7 @@ const CreateOS = () => {
   const [recorrente, setRecorrente] = useState(false);
   const [frequencia, setFrequencia] = useState("");
   const [parametros, setParametros] = useState([{ nome: "", min: "", max: "", unidade: "" }]);
+  const navigate = useNavigate();
 
   const handleAddParametro = () => {
     setParametros([...parametros, { nome: "", min: "", max: "", unidade: "" }]);
@@ -37,10 +39,9 @@ const CreateOS = () => {
     setParametros(newParametros);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validações básicas
+
     if (!titulo || !responsavel || !setor || !prioridade) {
       toast({
         title: "Erro",
@@ -50,23 +51,46 @@ const CreateOS = () => {
       return;
     }
 
-    // Simular salvamento
-    toast({
-      title: "Sucesso!",
-      description: "Ordem de Serviço criada com sucesso.",
-    });
+    const { data: ordem, error } = await supabase
+      .from('service_orders')
+      .insert({
+        titulo,
+        descricao,
+        responsavel,
+        setor,
+        prioridade,
+        prazo: prazo ? format(prazo, 'yyyy-MM-dd') : null,
+        recorrente,
+        frequencia: recorrente ? frequencia : null,
+        status: 'pendente'
+      })
+      .select()
+      .single();
 
-    console.log("Nova OS:", {
-      titulo,
-      descricao,
-      responsavel,
-      setor,
-      prioridade,
-      prazo,
-      recorrente,
-      frequencia,
-      parametros: parametros.filter(p => p.nome)
-    });
+    if (error) {
+      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    const paramsToSave = parametros
+      .filter(p => p.nome)
+      .map(p => ({
+        order_id: ordem.id,
+        nome: p.nome,
+        unidade: p.unidade || null,
+        valor_minimo: p.min ? Number(p.min) : null,
+        valor_maximo: p.max ? Number(p.max) : null,
+      }));
+
+    if (paramsToSave.length) {
+      const { error: pErr } = await supabase.from('service_order_parameters').insert(paramsToSave);
+      if (pErr) {
+        toast({ title: 'Aviso', description: 'OS criada, mas houve erro ao salvar parâmetros.', variant: 'destructive' });
+      }
+    }
+
+    toast({ title: 'Sucesso!', description: 'Ordem de Serviço criada com sucesso.' });
+    navigate('/orders');
   };
 
   return (
@@ -109,17 +133,17 @@ const CreateOS = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="setor">Setor *</Label>
-                  <Select value={setor} onValueChange={setSetor} required>
+<Select value={setor} onValueChange={setSetor} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o setor" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="producao-a">Produção A</SelectItem>
-                      <SelectItem value="producao-b">Produção B</SelectItem>
-                      <SelectItem value="estoque">Estoque</SelectItem>
-                      <SelectItem value="laboratorio">Laboratório</SelectItem>
-                      <SelectItem value="qualidade">Qualidade</SelectItem>
-                      <SelectItem value="expedicao">Expedição</SelectItem>
+                      <SelectItem value="Produção A">Produção A</SelectItem>
+                      <SelectItem value="Produção B">Produção B</SelectItem>
+                      <SelectItem value="Estoque">Estoque</SelectItem>
+                      <SelectItem value="Laboratório">Laboratório</SelectItem>
+                      <SelectItem value="Qualidade">Qualidade</SelectItem>
+                      <SelectItem value="Expedição">Expedição</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -139,16 +163,16 @@ const CreateOS = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="responsavel">Responsável *</Label>
-                  <Select value={responsavel} onValueChange={setResponsavel} required>
+<Select value={responsavel} onValueChange={setResponsavel} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o responsável" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="joao-silva">João Silva</SelectItem>
-                      <SelectItem value="maria-santos">Maria Santos</SelectItem>
-                      <SelectItem value="pedro-lima">Pedro Lima</SelectItem>
-                      <SelectItem value="ana-costa">Ana Costa</SelectItem>
-                      <SelectItem value="carlos-oliveira">Carlos Oliveira</SelectItem>
+                      <SelectItem value="João Silva">João Silva</SelectItem>
+                      <SelectItem value="Maria Santos">Maria Santos</SelectItem>
+                      <SelectItem value="Pedro Lima">Pedro Lima</SelectItem>
+                      <SelectItem value="Ana Costa">Ana Costa</SelectItem>
+                      <SelectItem value="Carlos Oliveira">Carlos Oliveira</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -93,10 +93,10 @@ export default function Users() {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Update the user's role
+// Update the user's role
         const { error: updateError } = await supabase
           .from('profiles')
-          .update({ role: formData.role })
+          .update({ role: formData.role as any })
           .eq('id', authData.user.id);
 
         if (updateError) throw updateError;
