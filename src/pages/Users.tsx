@@ -140,7 +140,7 @@ export default function Users() {
         .from('profiles')
         .update({
           full_name: formData.fullName,
-          role: formData.role,
+          role: formData.role as any,
         })
         .eq('id', editingUser.id);
 

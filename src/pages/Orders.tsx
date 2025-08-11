@@ -56,8 +56,16 @@ const Orders = () => {
         .update({ status: "concluida" })
         .eq("id", ordemId);
       if (error) throw error;
+      return ordemId;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["service_orders"] }),
+    onSuccess: (ordemId: string) => {
+      // Atualiza o cache para o botão de download aparecer imediatamente
+      queryClient.setQueryData(["service_orders"], (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.map((o: any) => (o.id === ordemId ? { ...o, status: "concluida" } : o));
+      });
+      queryClient.invalidateQueries({ queryKey: ["service_orders"] });
+    },
   });
   const getStatusColor = (status: string) => {
     switch (status) {
