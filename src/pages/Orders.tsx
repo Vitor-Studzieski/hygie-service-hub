@@ -65,6 +65,17 @@ const Orders = () => {
         return oldData.map((o: any) => (o.id === ordemId ? { ...o, status: "concluida" } : o));
       });
       queryClient.invalidateQueries({ queryKey: ["service_orders"] });
+      toast({
+        title: "Ordem concluída!",
+        description: "A ordem de serviço foi marcada como concluída.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao concluir ordem",
+        description: "Ocorreu um erro ao marcar a ordem como concluída.",
+        variant: "destructive",
+      });
     },
   });
   const getStatusColor = (status: string) => {
@@ -147,12 +158,8 @@ const downloadOrdemPlanilha = (ordem: any) => {
     XLSX.writeFile(wb, nomeArquivo);
   };
 
-  const handleConcluirOrdem = (ordemId: any) => {
+  const handleConcluirOrdem = (ordemId: string) => {
     concluirMut.mutate(ordemId);
-    toast({
-      title: "Ordem concluída!",
-      description: "A ordem de serviço foi marcada como concluída.",
-    });
   };
   const handleVisualizarOrdem = (ordemId: number) => {
     navigate(`/view-order/${ordemId}`);
