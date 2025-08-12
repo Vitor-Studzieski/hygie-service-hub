@@ -51,14 +51,23 @@ const Orders = () => {
   const queryClient = useQueryClient();
   const concluirMut = useMutation({
     mutationFn: async (ordemId: string) => {
-      const { error } = await supabase
+      console.log('Tentando concluir ordem:', ordemId);
+      const { data, error } = await supabase
         .from("service_orders")
         .update({ status: "concluida" })
-        .eq("id", ordemId);
-      if (error) throw error;
+        .eq("id", ordemId)
+        .select();
+      
+      if (error) {
+        console.error('Erro ao atualizar ordem:', error);
+        throw error;
+      }
+      
+      console.log('Ordem atualizada com sucesso:', data);
       return ordemId;
     },
     onSuccess: (ordemId: string) => {
+      console.log('Mutação bem-sucedida para ordem:', ordemId);
       // Atualiza o cache para o botão de download aparecer imediatamente
       queryClient.setQueryData(["service_orders"], (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
@@ -71,6 +80,7 @@ const Orders = () => {
       });
     },
     onError: (error) => {
+      console.error('Erro na mutação:', error);
       toast({
         title: "Erro ao concluir ordem",
         description: "Ocorreu um erro ao marcar a ordem como concluída.",
@@ -78,6 +88,7 @@ const Orders = () => {
       });
     },
   });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'concluida': return 'bg-green-100 text-green-800 border-green-200';
@@ -106,7 +117,7 @@ const Orders = () => {
     }
   };
 
-const filteredOrdens = ordens.filter((ordem: any) => {
+  const filteredOrdens = ordens.filter((ordem: any) => {
     const matchesSearch = ordem.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ordem.responsavel.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "todas" || ordem.status === filterStatus;
@@ -115,14 +126,14 @@ const filteredOrdens = ordens.filter((ordem: any) => {
     return matchesSearch && matchesStatus && matchesSetor;
   });
 
-const ordensStats = {
+  const ordensStats = {
     todas: ordens.length,
     pendentes: ordens.filter((o: any) => o.status === 'pendente').length,
     concluidas: ordens.filter((o: any) => o.status === 'concluida').length,
     atrasadas: ordens.filter((o: any) => o.status === 'atrasada').length
   };
 
-const downloadOrdemPlanilha = (ordem: any) => {
+  const downloadOrdemPlanilha = (ordem: any) => {
     const dadosOrdem = [
       ['ORDEM DE SERVIÇO', ''],
       ['', ''],
@@ -159,13 +170,15 @@ const downloadOrdemPlanilha = (ordem: any) => {
   };
 
   const handleConcluirOrdem = (ordemId: string) => {
+    console.log('Iniciando conclusão da ordem:', ordemId, typeof ordemId);
     concluirMut.mutate(ordemId);
   };
-  const handleVisualizarOrdem = (ordemId: number) => {
+
+  const handleVisualizarOrdem = (ordemId: string) => {
     navigate(`/view-order/${ordemId}`);
   };
 
-  const handleEditarOrdem = (ordemId: number) => {
+  const handleEditarOrdem = (ordemId: string) => {
     navigate(`/edit-order/${ordemId}`);
   };
 
@@ -186,9 +199,9 @@ const downloadOrdemPlanilha = (ordem: any) => {
               <span><strong>Setor:</strong> {ordem.setor}</span>
               <span><strong>Responsável:</strong> {ordem.responsavel}</span>
               <span><strong>Criado:</strong> {new Date(ordem.criado).toLocaleDateString('pt-BR')}</span>
-              <span><strong>Prazo:</strong> {new Date(ordem.prazo).toLocaleDateString('pt-BR')}</span>
+              <span><strong>Prazo:</strong> {ordem.prazo ? new Date(ordem.prazo).toLocaleDateString('pt-BR') : '-'}</span>
             </div>
-</div>
+          </div>
           <div className="flex items-center gap-2 ml-4">
             <Badge className={getStatusColor(ordem.status)}>
               {ordem.status.charAt(0).toUpperCase() + ordem.status.slice(1)}
@@ -247,9 +260,10 @@ const downloadOrdemPlanilha = (ordem: any) => {
               size="sm" 
               className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
               onClick={() => handleConcluirOrdem(ordem.id)}
+              disabled={concluirMut.isPending}
             >
               <CheckCircle2 className="w-4 h-4 mr-1" />
-              Concluir
+              {concluirMut.isPending ? 'Concluindo...' : 'Concluir'}
             </Button>
           )}
         </div>
@@ -257,7 +271,7 @@ const downloadOrdemPlanilha = (ordem: any) => {
     </Card>
   );
 
-return (
+  return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
@@ -328,7 +342,7 @@ return (
 
         {/* Tabs com Estatísticas */}
         <Tabs defaultValue="todas" className="w-full">
-<TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="todas" className="flex items-center gap-2">
               Todas ({ordensStats.todas})
             </TabsTrigger>
@@ -345,25 +359,25 @@ return (
 
           <TabsContent value="todas" className="mt-6">
             <div className="space-y-4">
-{filteredOrdens.map((ordem: any) => renderOrderCard(ordem))}
+              {filteredOrdens.map((ordem: any) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="pendentes">
             <div className="space-y-4">
-{filteredOrdens.filter((o: any) => o.status === 'pendente').map((ordem: any) => renderOrderCard(ordem))}
+              {filteredOrdens.filter((o: any) => o.status === 'pendente').map((ordem: any) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="concluidas">
             <div className="space-y-4">
-{filteredOrdens.filter((o: any) => o.status === 'concluida').map((ordem: any) => renderOrderCard(ordem))}
+              {filteredOrdens.filter((o: any) => o.status === 'concluida').map((ordem: any) => renderOrderCard(ordem))}
             </div>
           </TabsContent>
 
           <TabsContent value="atrasadas">
             <div className="space-y-4">
-{filteredOrdens.filter((o: any) => o.status === 'atrasada').map((ordem: any) => (
+              {filteredOrdens.filter((o: any) => o.status === 'atrasada').map((ordem: any) => (
                 <div key={ordem.id} className="border-l-4 border-l-red-500">
                   {renderOrderCard(ordem)}
                 </div>
